@@ -1,0 +1,247 @@
+---
+title: "Building a Neural Network with Keras in R"
+author: "Gregorio Salcedo"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    theme: readable
+    df_print: paged
+    highlight: tango
+    toc: yes
+    toc_float: yes
+---
+
+```{r include = FALSE}
+
+# SET GLOBAL KNITR OPTIONS
+
+knitr::opts_chunk$set(echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      fig.width = 10, 
+                      fig.height = 8)
+# LOAD PACKAGES
+library(tensorflow)
+library(keras)
+library(tidyverse)
+library(magrittr)
+library(reticulate)
+py_config()
+
+
+```
+
+<br>
+<br>
+
+# Introduction
+
+# Introduction
+
+This code-through explores how to build, train, and evaluate a simple neural network using the TensorFlow and Keras libraries in R. Neural networks are a class of machine learning models that are capable of learning complex relationships between inputs and outputs, making them suitable for tasks like image classification, speech recognition, and more. 
+
+
+
+<br>
+
+## Content Overview
+
+In this tutorial, we will use the `MNIST` dataset, a classic benchmark dataset of handwritten digits, to demonstrate the process of building a neural network. The goal is to classify images of digits (0-9) into their respective categories. We will walk through the entire process, from installing the necessary libraries and preparing the data to defining the model architecture, training the model, and evaluating its performance.
+
+<br>
+
+## Why You Should Care
+
+This topic is valuable because neural networks have become a foundational tool in modern machine learning and data science. Using Keras and TensorFlow in R allows data scientists and analysts to harness the power of deep learning while maintaining the simplicity and familiarity of the R programming environment. This makes it easier for those already familiar with R to expand their skill set into the realm of deep learning without needing to switch to another programming language like Python.
+
+<br>
+
+## Learning Objectives
+
+By the end of this code-through, you will have a solid understanding of how to implement a neural network in R using TensorFlow and Keras, and how to apply this knowledge to other classification problems.
+
+<br>
+<br>
+
+## Installing appropriate packages:
+
+Make sure that TensorFlow and Keras are installed in your R environment. If you have not installed these packages, use the following commands:
+<br>
+<br>
+Install Required R packages:
+<br>
+install.packages("remotes")
+remotes::install_github("rstudio/tensorflow")
+<br>
+<br>
+Install Python Using Reticulate:
+<br>
+reticulate::install_python()
+<br>
+<br>
+Install TensorFlow:
+<br>
+library(tensorflow)
+install_tensorflow(envname = "r-tensorflow")
+<br>
+<br>
+Install Tidy Model
+<br>
+install.packages("tidymodels") install.packages("DiagrammeR") reticulate::py_install("pydot")
+reticulate::py_install("graphviz")
+<br>
+<br>
+Install magrittr:
+install.packages("magrittr")
+<br>
+
+## Load and Prepare Data
+
+A basic example shows how to load and prepare data.
+
+```{r}
+# Load and preprocess the MNIST dataset
+mnist <- dataset_mnist()
+x_train <- mnist$train$x / 255
+y_train <- mnist$train$y
+x_test <- mnist$test$x / 255
+y_test <- mnist$test$y
+
+# Reshape the data to match the input shape expected by the model
+x_train <- array_reshape(x_train, c(nrow(x_train), 28, 28, 1))
+x_test <- array_reshape(x_test, c(nrow(x_test), 28, 28, 1))
+
+# Display the dimensions of the datasets
+dim(x_train)
+dim(x_test)
+
+```
+<br>
+<br>
+The MNIST dataset consists of 60,000 training images and 10,000 testing images of handwritten digits. We loaded this dataset and normalized the images by scaling pixel values to the range [0, 1].
+<br>
+<br>
+## Build the Neural Network
+Here we will build a simple neural network using the Keras Sequential API.
+
+```{r}
+loss_fn <- loss_sparse_categorical_crossentropy(from_logits = FALSE)
+
+# Define the input layer in R
+inputs <- layer_input(shape = c(28, 28))
+outputs <- inputs %>%
+  layer_flatten() %>%
+  layer_dense(units = 128, activation = "relu") %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 10, activation = "softmax")
+
+# Create the model
+model <- keras_model(inputs = inputs, outputs = outputs)
+
+
+# Compile the model
+model$compile(
+  optimizer = tf$keras$optimizers$Adam(),
+  loss = loss_fn,
+  metrics = list("accuracy")
+)
+
+
+```
+
+
+## Training the Data
+
+More specifically, this can be used for...
+
+```{r}
+
+reticulate::py_run_string("
+history = r.model.fit(
+    r.x_train,
+    r.y_train,
+    epochs=5,
+    batch_size=32,
+    validation_split=0.2
+)
+
+# Convert the history into a dictionary for R
+history_dict = {
+    'loss': history.history['loss'],
+    'accuracy': history.history['accuracy'],
+    'val_loss': history.history['val_loss'],
+    'val_accuracy': history.history['val_accuracy'],
+    'epoch': list(range(1, len(history.history['loss']) + 1))
+}
+")
+
+# Extract the history from Python to R
+history <- reticulate::py$history
+# Convert the training history to a data frame
+history_data <- data.frame(
+    epoch = seq_along(history$epoch),
+    loss = unlist(history$history$loss),
+    accuracy = unlist(history$history$accuracy),
+    val_loss = unlist(history$history$val_loss),
+    val_accuracy = unlist(history$history$val_accuracy)
+)
+
+# Display the history data
+print(history_data)
+
+
+
+```
+
+<br>
+
+What's more, it can also be used for...
+
+```{r}
+
+# Some code
+
+```
+
+<br>
+
+Most notably, it's valuable for...
+
+```{r}
+
+# Some code
+
+```
+
+<br> 
+<br>
+
+# Further Resources
+
+Learn more about [package, technique, dataset] with the following:
+
+<br>
+
+* Resource I [Hyperlink Text](https://www.google.com)
+
+* Resource II [Hyperlink Text](https://www.google.com)
+
+* Resource III [Hyperlink Text](https://www.google.com)
+
+<br>
+<br>
+
+# Works Cited
+
+This code through references and cites the following sources:
+
+<br>
+
+* Author (Year). Source I. [Hyperlink Text](https://www.google.com)
+
+* Author (Year). Source II. [Hyperlink Text](https://www.google.com)
+
+* Author (Year). Source III. [Hyperlink Text](https://www.google.com)
+
+<br>
+<br>
